@@ -1,25 +1,37 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import {connect} from 'react-redux';
+import {addDataToMap} from 'kepler.gl/actions';
+import {processCsvData} from 'kepler.gl/processors';
+import jogleActivityData from './data/jogle_polylines_csv.js';
+import Map from './Map';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends React.Component {
+
+    componentDidMount() {
+        this.props.dispatch(
+            addDataToMap({
+                datasets: {
+                    info: {
+                        label: 'JOGLE trip legs',
+                        id: 'jogle_trip_legs'
+                    },
+                    data: processCsvData(jogleActivityData)
+                },
+                option: {
+                    centerMap: true,
+                    readOnly: true,
+                    keepExistingConfig: false
+                }
+            })
+        );
+    }
+
+    render () {
+        return <Map />
+    }
 }
 
-export default App;
+const mapStateToProps = state => state;
+const dispatchToProps = dispatch => ({dispatch});
+
+export default connect(mapStateToProps, dispatchToProps)(App);

@@ -1,0 +1,30 @@
+name: AWS OIDC
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2.1.1
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+            aws-region: eu-west-1
+            role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_ID }}:role/${{ secrets.IAM_ROLE_NAME }}
+            role-session-name: github-actions-oidc-role
+
+      - name: Upload object to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+        run: |
+          echo "Here is a test file from Github!" >> test.txt
+          aws s3 cp test.txt s3://${{ env.S3_BUCKET }}
